@@ -39,14 +39,14 @@ export default function BarberDecor() {
     <div className="scroll-razor" ref={razor}>
       <svg viewBox="0 0 180 200" fill="none">
         <defs><linearGradient id="razor-steel" x1="35" y1="30" x2="60" y2="165" gradientUnits="userSpaceOnUse"><stop stopColor="#faf5df"/><stop offset=".45" stopColor="#9caaa9"/><stop offset=".55" stopColor="#edf0e7"/><stop offset="1" stopColor="#8c927e"/></linearGradient></defs>
-        <path d="M44 171C30 162 32 135 34 108L40 38Q42 25 51 28L56 33 58 132Q60 164 50 173Z" fill="#24291e" stroke="#c7a85f" strokeWidth="2"/>
+        <path d="M44 171C30 162 32 135 34 108L40 38Q42 25 51 28L56 33 58 132Q60 164 50 173Z" fill="#24291e" stroke="#D3AF37" strokeWidth="2"/>
         <path d="M43 145 47 45" stroke="#8c773e" strokeWidth="2"/>
         <g className="razor-blade">
           <path d="M48 165 43 134 39 48Q38 29 49 24L68 28 71 118Q70 139 54 150L53 165Z" fill="url(#razor-steel)" stroke="#777f71" strokeWidth="1.5"/>
           <path d="M62 35 64 116Q63 131 53 139" stroke="#fff" strokeOpacity=".8" strokeWidth="2"/>
-          <path d="M49 150 48 163" stroke="#c7a85f" strokeWidth="5"/>
+          <path d="M49 150 48 163" stroke="#D3AF37" strokeWidth="5"/>
         </g>
-        <circle cx="48" cy="165" r="5" fill="#dbc180" stroke="#736137" strokeWidth="2"/>
+        <circle cx="48" cy="165" r="5" fill="#D3AF37" stroke="#736137" strokeWidth="2"/>
       </svg>
     </div>
   </div>;
