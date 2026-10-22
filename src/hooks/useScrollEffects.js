@@ -35,7 +35,7 @@ export default function useScrollEffects(page) {
       dirty = true;
     }
     function lock() {
-      if (document.body.style.overflow === "hidden") lenis?.stop();
+      if (document.querySelector("dialog[open]") || getComputedStyle(document.body).overflow === "hidden") lenis?.stop();
       else lenis?.start();
     }
     const locks = new MutationObserver(lock);
@@ -43,7 +43,10 @@ export default function useScrollEffects(page) {
       attributes: true,
       attributeFilter: ["style"],
     });
+    const dialogLocks = new MutationObserver(lock);
+    dialogLocks.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"] });
     async function setup() {
+      dirty = true;
       if (reduced.matches || !desktop.matches) {
         lenis?.destroy();
         lenis = null;
@@ -87,6 +90,7 @@ export default function useScrollEffects(page) {
       cancelAnimationFrame(raf);
       lenis?.destroy();
       locks.disconnect();
+      dialogLocks.disconnect();
       window.removeEventListener("scroll", scroll);
       window.removeEventListener("resize", scroll);
       reduced.removeEventListener("change", setup);

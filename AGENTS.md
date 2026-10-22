@@ -9,5 +9,8 @@
 - Ao concluir uma etapa, verificar build e responsividade, salvar em commit e enviar ao repositório quando houver acesso. Relatar bloqueios com precisão.
 - Cada tarefa cloud já é isolada; usar este checkout sem criar worktrees, salvo solicitação explícita.
 
-- Agenda: bloqueio imediato por barbeiro, duração padrão 1h, progressiva e alisamento 2h. Consultar docs/AGENDA.md. Ainda é preciso conectar um projeto Supabase real para ativar. Não simular indisponibilidade com localStorage.
+- Agenda: bloqueio imediato por barbeiro, duração padrão 1h, progressiva e alisamento 2h. Consultar docs/AGENDA.md. O usuário confirmou aplicação do SQL, variáveis na Vercel e consulta de horários funcionando. A configuração da Vercel não implica que a chave pública esteja disponível neste workspace. Não simular indisponibilidade com localStorage.
 - Hero: foto tratada e animação discreta dourada no fundo escuro, respeitando movimento reduzido.
+
+- Recuperação de reserva: a sessão guarda apenas a identificação de uma solicitação incerta para repetir a mesma operação, nunca para simular disponibilidade. Testar resposta perdida após gravação e recarregamento.
+- Fontes são locais em public/fonts, com licenças. Manter contraste AA dos textos pequenos e respeitar movimento reduzido.

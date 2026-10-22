@@ -1,6 +1,6 @@
 # Ativar a agenda compartilhada
 
-A agenda está implementada e foi testada com PostgreSQL 17 local, inclusive duas reservas concorrentes. Projeto informado pelo usuário: `https://rchyxxcxpgjjybcebktp.supabase.co`. A aplicação do SQL e a chave pública ainda precisam ser configuradas; a conexão hospedada ainda não foi validada. Sem configuração, o site oferece apenas consulta pelo WhatsApp e não anuncia reservas confirmadas.
+A agenda está implementada e foi testada com PostgreSQL 17 local, inclusive duas reservas concorrentes. Projeto informado pelo usuário: `https://rchyxxcxpgjjybcebktp.supabase.co`. O usuário confirmou a aplicação do SQL, a configuração na Vercel e a consulta de horários funcionando. As verificações automatizadas deste workspace usam PostgreSQL isolado e não alteram o banco hospedado. Sem configuração, o site oferece apenas consulta pelo WhatsApp e não anuncia reservas confirmadas.
 
 ## 1. Criar o Supabase
 
@@ -41,7 +41,7 @@ Para desenvolver na nuvem, use as mesmas duas variáveis nas configurações do 
 - Bloqueio imediato por barbeiro ao clicar em **Reservar horário** e receber sucesso do banco. Abrir o WhatsApp não é necessário para bloquear.
 - A agenda atualiza ao trocar serviço/dia, ao voltar à janela e a cada 30 segundos. O banco verifica o conflito novamente na gravação.
 - Reservas contíguas são permitidas; reservas sobrepostas do mesmo barbeiro são proibidas por uma restrição de exclusão PostgreSQL, inclusive em requisições concorrentes.
-- Uma repetição da mesma solicitação retorna a reserva existente, sem duplicá-la.
+- Uma repetição da mesma solicitação retorna a reserva existente, sem duplicá-la. Se a resposta se perder, use **Verificar minha reserva**. A identificação da solicitação é preservada na sessão para recuperar o resultado mesmo após recarregar a página. Isso não substitui o bloqueio no banco.
 - Sem banco configurado ou com erro de consulta, o site não inventa horários livres nem confirma uma reserva localmente.
 
 ## Consultar e cancelar reservas
@@ -88,7 +88,7 @@ npm run test:db
 O teste de navegador usa as funções reais desse PostgreSQL por um transporte HTTP local de teste. Não comprova conexão com Supabase hospedado. Execute o Vite normal na porta 5173 sem as variáveis de agenda e outra instância na 5174 com variáveis fictícias que o teste intercepta:
 
 ```sh
-npm run dev -- --port 5173
+VITE_SUPABASE_URL= VITE_SUPABASE_ANON_KEY= npm run dev -- --port 5173
 # Em outro terminal:
 VITE_SUPABASE_URL=https://wm-booking-test.supabase.co \
 VITE_SUPABASE_ANON_KEY=sb_publishable_wm-test npm run dev -- --port 5174
@@ -97,3 +97,5 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:booking
 ```
 
 Ao terminar, pare somente os processos que iniciou e remova o contêiner de teste com `docker rm -f wm-booking-test`.
+
+A compilação recusa chaves privadas em `VITE_SUPABASE_ANON_KEY`. As fontes ficam em arquivos locais; `npm run test:ui` verifica layout, teclado, bloqueio de rolagem e acessibilidade automatizada com o Vite da porta 5173.

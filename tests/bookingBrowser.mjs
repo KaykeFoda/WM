@@ -33,7 +33,7 @@ async function choose(page,barber,service='7'){
  await page.getByRole('button',{name:`Agendar com ${barber}`}).click();
  await page.getByLabel('Qual serviço você quer?').selectOption(service);
  await page.getByLabel('Dia do atendimento').fill(day);
- await page.waitForFunction(()=>document.querySelector('#booking-time option:not([disabled])'));
+ await page.waitForFunction(()=>[...document.querySelectorAll('#booking-time option')].some(o=>o.textContent==='14:00'&&!o.disabled));
  const option=page.locator('#booking-time option').filter({hasText:/^14:00$/});
  await page.getByLabel('Horário disponível').selectOption(await option.getAttribute('value'));
 }
@@ -57,6 +57,35 @@ try{
  await second.getByLabel('Qual serviço você quer?').selectOption('0');await second.getByLabel('Dia do atendimento').fill(day);
  await second.waitForFunction(()=>[...document.querySelectorAll('#booking-time option')].some(o=>o.textContent==='14:00'&&!o.disabled));
  await second.keyboard.press('Escape');
+ // The DB may commit even when the client loses the HTTP response.
+ const lost=await newPage();await choose(lost,'Negraauu','0');
+ let firstAttemptId;
+ await lost.route('https://wm-booking-test.supabase.co/rest/v1/rpc/wm_reserve',async route=>{
+   const request=route.request().postDataJSON();firstAttemptId=request.p_request_id;
+   sql(`select public.wm_reserve(${literal(request.p_request_id)}::uuid,${literal(request.p_barber)},${literal(request.p_service)},${literal(request.p_start)}::timestamptz);`);
+   await route.abort();
+ });
+ await lost.getByRole('button',{name:'Reservar horário',exact:true}).click();
+ await lost.getByRole('button',{name:'Verificar minha reserva',exact:true}).waitFor();
+ // Closing and reloading must preserve the original idempotency ID.
+ await lost.keyboard.press('Escape');await lost.reload({waitUntil:'domcontentloaded'});
+ await lost.getByRole('button',{name:'Agendar com Negraauu'}).click();
+ await lost.getByRole('button',{name:'Verificar minha reserva',exact:true}).waitFor();
+ await lost.unroute('https://wm-booking-test.supabase.co/rest/v1/rpc/wm_reserve');
+ await lost.getByRole('button',{name:'Verificar minha reserva',exact:true}).click();
+ await lost.getByRole('heading',{name:'Horário reservado!'}).waitFor();
+ const recovered=await lost.getByRole('link',{name:'Falar com Negraauu'}).getAttribute('href');
+ assert.match(new URL(recovered).searchParams.get('text'),new RegExp(firstAttemptId));
+ assert.equal(sql("select count(*) from public.wm_bookings where barber_id='negraauu';"),'1');
+ assert.equal(await lost.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('wm.pending-booking:')).length),0);
+ // Reject invalid timestamp payloads instead of crashing Intl/date rendering.
+ const malformed=await newPage();
+ await malformed.route('https://wm-booking-test.supabase.co/rest/v1/rpc/wm_availability',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{starts_at:'bad-date',ends_at:'bad-date',available:true}])}));
+ await malformed.getByRole('button',{name:'Agendar com Will'}).click();
+ await malformed.getByLabel('Qual serviço você quer?').selectOption('0');
+ await malformed.getByLabel('Dia do atendimento').fill(day);
+ await malformed.getByRole('alert').filter({hasText:/Não foi possível consultar/}).waitFor();
+ assert.equal(await malformed.getByRole('button',{name:'Reservar horário',exact:true}).isDisabled(),true);
  // A failed shared availability request must not turn into an available slot.
  const failed=await newPage();
  await failed.route('https://wm-booking-test.supabase.co/rest/v1/rpc/**',route=>route.abort());
@@ -76,5 +105,5 @@ try{
   await second.screenshot({path:`/tmp/wm-shared-booking-${width}.png`});await second.keyboard.press('Escape');
  }
  assert.deepEqual(errors,[]);
- console.log('PASS: real database reserve, stale-slot conflict, 2-hour overlap, other barber, WhatsApp receipt, network failure, no-backend fallback, four widths; no page errors.');
+ console.log('PASS: real database reserve, stale-slot conflict, 2-hour overlap, other barber, WhatsApp receipt, lost-response recovery across reload, invalid timestamps, network failure, no-backend fallback, four widths; no page errors.');
 }finally{await browser.close();}
