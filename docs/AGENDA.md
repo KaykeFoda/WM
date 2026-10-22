@@ -1,6 +1,6 @@
 # Ativar a agenda compartilhada
 
-A agenda está implementada e foi testada com PostgreSQL 17 local, inclusive duas reservas concorrentes. Ela **ainda não está conectada a um projeto Supabase real**. Sem configuração, o site oferece apenas consulta pelo WhatsApp e não anuncia reservas confirmadas.
+A agenda está implementada e foi testada com PostgreSQL 17 local, inclusive duas reservas concorrentes. Projeto informado pelo usuário: `https://rchyxxcxpgjjybcebktp.supabase.co`. A aplicação do SQL e a chave pública ainda precisam ser configuradas; a conexão hospedada ainda não foi validada. Sem configuração, o site oferece apenas consulta pelo WhatsApp e não anuncia reservas confirmadas.
 
 ## 1. Criar o Supabase
 
