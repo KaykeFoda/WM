@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://wm-barber.vercel.app/sitemap.xml
